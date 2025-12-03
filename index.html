@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ophthalmology Clinic Queueing System</title>
+<style>
+/* ====== THEME / BASE ====== */
+:root {
+  --bg: #f0f2f5;
+  --primary: #007bff;
+  --done: #6c757d;
+  --owc: #ffc107;
+  --recall: #17a2b8;
+  --success: #28a745;
+  --danger: #dc3545;
+  --card-bg: #ffffff;
+  --shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Segoe UI, Tahoma, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: #222;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+#headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease;
+  max-height: 200px;
+  opacity: 1;
+}
+
+#headerBar.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+}
+
+h1 {
+  font-size: 1.4rem;
+}
+
+#settingsButton {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ===== LAYOUT ===== */
+#tablesContainer {
+  display: flex;
+  flex-direction: column; /* stack tables on top of bottom lists */
+  gap: 16px; /* optional spacing */
+}
+
+
+#tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  flex: 1;
+}
+
+#historyContainer,
+#owcContainer {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#historyContainer {
+  width: 280px;
+}
+
+#owcContainer {
+  width: 320px;
+}
+
+/* ===== TABLE BOX ===== */
+.table-box {
+  background: var(--card-bg);
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.table-box.highlight {
+  animation: highlightPulse 1s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0% { box-shadow: 0 0 20px rgba(40,167,69,0.75); transform: scale(1); }
+  50% { box-shadow: 0 0 40px rgba(40,167,69,0.9); transform: scale(1.03); }
+  100% { box-shadow: 0 0 20px rgba(40,167,69,0.75); transform: scale(1); }
+}
+
+.table-box.pulse {
+  animation: pulseRecall 1s ease-in-out;
+}
+
+@keyframes pulseRecall {
+  0% { box-shadow: 0 0 20px rgba(23,162,184,0.8); transform: scale(1); }
+  50% { box-shadow: 0 0 40px rgba(23,162,184,0.95); transform: scale(1.05); }
+  100% { box-shadow: 0 0 20px rgba(23,162,184,0.8); transform: scale(1); }
+}
+
+.table-box.pulse-owc {
+  animation: pulseOWCTable 0.8s ease-in-out;
+}
+
+@keyframes pulseOWCTable {
+  0% { box-shadow: 0 0 8px rgba(220,53,69,0.8); transform: scale(1); }
+  50% { box-shadow: 0 0 25px rgba(220,53,69,0.95); transform: scale(1.03); }
+  100% { box-shadow: 0 0 8px rgba(220,53,69,0.8); transform: scale(1); }
+}
+
+.table-box.pulse-restore {
+  animation: pulseRestore 0.8s ease-in-out;
+}
+
+@keyframes pulseRestore {
+  0% { box-shadow: 0 0 8px rgba(255,193,7,0.8); transform: scale(1); }
+  50% { box-shadow: 0 0 25px rgba(255,193,7,0.95); transform: scale(1.03); }
+  100% { box-shadow: 0 0 8px rgba(255,193,7,0.8); transform: scale(1); }
+}
+
+/* ===== QUEUE NUMBER ===== */
+.queue-number {
+  font-size: 60px;
+  font-weight: 900;
+  background: #e7eaed;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 18px 0;
+
+  /* Prevent overflow */
+  display: flex;
+  align-items: center;      /* vertically center */
+  justify-content: center;  /* horizontally center */
+  font-family: arial;   /* equal spacing for digits */
+  text-align: center;
+  overflow: hidden;          /* hide overflow */
+  white-space: nowrap;       /* keep text in one line */
+  text-overflow: ellipsis;   /* show ... if too long */
+  width: 100%;               /* fill parent width */
+  box-sizing: border-box;    /* include padding in width */
+}
+
+
+/* ===== BUTTONS ===== */
+button.common {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+
+button.common:disabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+  transform: none;
+}
+
+button.common:not(:disabled):hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.next-btn { background: var(--primary); }
+.done-btn { background: var(--done); }
+.owc-btn { background: var(--danger); color: #fff; }
+.recall-btn { background: var(--recall); }
+.small-btn { padding: 6px 10px; border-radius: 8px; font-weight: 700; }
+
+/* ===== TABLE BUTTON STACK ===== */
+.table-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.table-buttons .common {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+/* SETTINGS MODAL BUTTON STACK */
+.settings-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.settings-buttons button {
+  width: 92%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 12px;
+  color: #fff !important;
+}
+
+#modalBox button:hover {
+  opacity: 0.9;
+}
+h2.section-title {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.done-number, .owc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #dfe4e8;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 900;
+  word-break: break-word;
+}
+
+.done-number > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.done-number > div:first-child span.prefix-color {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.done-number > div:first-child span:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60px;
+}
+
+.done-number > div:last-child {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ===== COLLAPSIBLE PANEL ===== */
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toggle-btn {
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.toggle-btn .arrow {
+  display: inline-block;
+  transition: transform 0.28s ease;
+}
+
+.toggle-btn.collapsed .arrow {
+  transform: rotate(-90deg);
+}
+
+.collapsible-content {
+  overflow: hidden;
+  max-height: 1200px;
+  transition: max-height 0.36s ease, opacity 0.28s ease, padding-top 0.28s ease;
+  padding-top: 10px;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  opacity: 0;
+}
+
+/* ===== SELECTS & CONTROLS ===== */
+.prefix-dropdown { width: 100%; padding: 8px; border-radius: 8px; margin-top: 10px; text-align: center; }
+.controls-row { display: flex; gap: 8px; margin-top: 8px; }
+.owc-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 6px; }
+
+/* ACTION BUTTONS INSIDE LISTS */
+.list-action-btn { padding: 6px 8px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; }
+.restore-select { padding: 6px; border-radius: 6px; border: 1px solid #ccc; font-weight: 600; margin-right: 6px; }
+
+/* ===== MODALS & OVERLAYS ===== */
+#modalOverlay, #userMenuOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 2000;
+}
+
+#userMenuBox, #modalBox {
+  background: #fff;
+  padding: 22px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #333;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  opacity: 0.95;
+  z-index: 3000;
+  font-size: 14px;
+}
+
+/* ===== HISTORY DONE LIST ===== */
+#historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+/* HISTORY DONE list hover */
+#historyList .owc-item:hover {
+  background-color: #d4f7d4; /* light green */
+  cursor: pointer;
+}
+
+/* OWC list hover */
+#owcList .owc-item:hover {
+  background-color: #f7d4d4; /* light red */
+  cursor: pointer;
+}
+
+/* Clicked/selected effect */
+.owc-item.selected {
+  background-color: #a8e6a1; /* medium green */
+  border-radius: 6px;
+}
+
+
+#historyList .owc-item {
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 900;
+  font-size: 16px;
+  word-break: break-word;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width: 900px) {
+  .vital-list-grid, .done-list-grid { grid-template-columns: repeat(4,1fr); }
+  #tablesContainer, #historyContainer, #owcContainer, #tables { width: 100%; flex-direction: column; }
+}
+
+@media(max-width: 700px) {
+  .vital-list-grid, .done-list-grid { grid-template-columns: repeat(3,1fr); }
+  .queue-number { font-size: 50px; }
+}
+
+@media(max-width: 500px) {
+  .vital-list-grid, .done-list-grid { grid-template-columns: repeat(2,1fr); }
+  .queue-number { font-size: 40px; padding: 10px; }
+  button.common { font-size: 14px; padding: 10px; }
+  h1, h2 { font-size: 1.1rem; }
+}
+
+@media(max-width: 400px) {
+  .queue-number { font-size: 32px; padding: 8px; }
+  button.common { font-size: 12px; padding: 8px; }
+  h1, h2 { font-size: 1rem; }
+}
+
+/* ===== RIGHT PANEL - OWC ===== */
+#owcContainer {
+  width: 320px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#owcContainer .card {
+  background: var(--card-bg);
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.owc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 6px; /* scrollbar spacing */
+}
+
+.owc-item {
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 900;
+  font-size: 16px;
+  word-break: break-word;
+}
+
+/* Restore select & buttons inside OWC */
+.restore-select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.list-action-btn {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ===== LEFT PANEL - History Done List ===== */
+#historyContainer {
+  width: 280px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#historyContainer .card {
+  background: var(--card-bg);
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 6px; /* scrollbar spacing */
+}
+
+#historyList .owc-item {
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 900;
+  font-size: 16px;
+  word-break: break-word;
+}
+.prefix-color {
+  flex-shrink: 0;        
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;        
+  font-weight: 800;
+  white-space: nowrap;    
+  color: #fff; /* Ensure the text is visible on colored background */
+}
+/* ===== FIXED HEADER ===== */
+/* Ensure header is at the very top */
+#headerBar {
+  margin-bottom: 20px; /* space below the header */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.check-btn {
+  background-color: #28a745; /* green */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.check-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.6);
+}
+
+.check-btn:active {
+  transform: scale(0.95);
+}
+.owc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f7f7f7;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.restore-select {
+  margin-right: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-weight: 600;
+}
+
+.owc-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* space between dropdown and button */
+}
+#modalOverlay {
+  pointer-events: auto;
+}
+
+#modalBox {
+  pointer-events: auto;
+}
+/* USER MENU OVERLAY: only block clicks on the box, not entire screen */
+#userMenuOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000; /* below modal */
+  pointer-events: none; /* make overlay not block clicks */
+}
+
+#userMenuBox {
+  pointer-events: auto; /* only box captures clicks */
+  background: #fff;
+  padding: 22px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  z-index: 1010; /* above its overlay */
+}
+
+/* SETTINGS MODAL */
+#modalOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 2000; /* above everything */
+  pointer-events: auto;
+}
+
+#modalBox {
+  pointer-events: auto;
+  z-index: 2010; /* above overlay */
+}
+}
+
+#tables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center; /* optional */
+}
+#bottomListsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#historyContainer, #owcContainer {
+  flex: 1;
+  min-width: 280px;
+}
+
+/* Both lists selection */
+#historyList .owc-item.selected,
+#owcList .owc-item.selected {
+  background-color: #4a90e2; /* blue shade */
+  color: #fff;
+}
+
+
+/* Subtle pulsing effect (inside only) */
+@keyframes pulseHighlight {
+  0%   { box-shadow: inset 0 0 8px #ff8c00; }
+  50%  { box-shadow: inset 0 0 12px #ff8c00; }
+  100% { box-shadow: inset 0 0 8px #ff8c00; }
+}
+
+.owc-item.highlight-pulse {
+  animation: pulseHighlight 0.8s ease-in-out 1;
+}
+
+.owc-list .owc-item:hover {
+  background-color: #d4f7d4; /* light green */
+  cursor: pointer;
+}
+
+
+#modalBox {
+  background: #fff;
+  padding: 22px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  pointer-events: auto; /* ensure buttons are clickable */
+}
+#mainContainer {
+  display: block; /* default for Nurse Station */
+  gap: 20px;
+}
+
+#mainContainer.side-by-side {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+#tables {
+  flex: 1;
+}
+
+#owcContainer {
+  width: 300px; /* adjust as needed */
+}
+
+#owcList, #historyList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 16px;
+}
+
+.owc-item {
+  display: flex;            /* Flex for centering */
+  align-items: center;      /* Vertical center */
+  justify-content: center;  /* Horizontal center */
+  width: 100%;              /* Full width of grid cell */
+  height: 40px;             /* Fixed height for uniform boxes */
+  background: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: inherit;
+  box-sizing: border-box;   /* Include padding in size */
+  padding: 0 8px;           /* Horizontal padding */
+}
+
+.owc-item.selected {
+  background: #b2e7a9;
+}
+
+
+
+</style>
+</head>
+<body>
+<!-- STARTUP USER MENU -->
+<div id="userMenuOverlay" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    z-index:1001;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+">
+  <div id="userMenuBox" style="background:#fff; padding:20px; border-radius:10px; width:300px; max-width:90%;">
+    <h2>Select Your Table</h2>
+    <select id="tableSelectMenu" style="width:100%;padding:10px;margin-top:10px;border-radius:8px;font-size:16px">
+      <option value="">-- Choose Table --</option>
+      <option value="1">Table 1</option>
+      <option value="2">Table 2</option>
+      <option value="all">Nurse Station (Show All Tables)</option>
+    </select>
+    <button class="small-btn" style="margin-top:14px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:800" onclick="confirmTableSelection()">Continue</button>
+  </div>
+</div>
+
+
+
+<!-- SETTINGS MODAL -->
+<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+  <div id="modalBox" style="background:#fff; padding:20px; border-radius:10px; width:300px; max-width:90%;">
+    <h2>Settings</h2>
+
+    <label style="display:block;margin-top:10px">Custom Prefixes (comma separated)</label>
+    <input id="prefixInput" type="text" value="GM" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc">
+    <div class="settings-buttons" style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+      <button onclick="savePrefix()" style="background:var(--primary); color:#fff; padding:10px; border:none; border-radius:8px;">SAVE PREFIXES</button>
+      <button onclick="resetQueues()" style="background:var(--danger); color:#fff; padding:10px; border:none; border-radius:8px;">RESET QUEUES & OWC</button>
+      <button onclick="changeTable()" style="background:#17a2b8; color:#fff; padding:10px; border:none; border-radius:8px;">CHANGE TABLE</button>
+      <button onclick="closeSettings()" style="background:var(--success); color:#fff; padding:10px; border:none; border-radius:8px;">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- HEADER & SETTINGS BUTTON -->
+<div id="headerBar">
+  <h1>Ophthalmology Clinic Queueing System</h1>
+  <button id="settingsButton" onclick="showSettings()" style="padding:8px 12px; border-radius:8px; background:#17a2b8; color:#fff; border:none;">Settings ⚙️</button>
+</div>
+
+<!-- OPTIONAL HEADER TOGGLE BUTTON -->
+<div style="margin-bottom:12px;">
+  <button id="headerToggleBtn" class="small-btn" onclick="toggleHeader()" style="background:#17a2b8;color:#fff;display:flex;align-items:center;justify-content:center;">
+    <span id="headerToggleIcon" style="display:inline-block;transition: transform 0.4s ease;">▾</span>
+  </button>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div id="tablesContainer">
+
+ <!-- MAIN TABLES GRID -->
+<div id="tables"></div>
+
+<!-- BOTTOM PANELS: History Done & OWC side by side -->
+<div id="bottomListsContainer" style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+  <!-- HISTORY DONE -->
+<div id="historyContainer" style="flex:1; min-width:280px;">
+  <div class="card">
+    <div class="collapsible-header" style="display:flex; align-items:center; justify-content:space-between;">
+      <h2 class="section-title">History Done List</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <select id="historyRestoreTable" style="padding:4px 8px; border-radius:6px;">
+          <option value="">Select Table</option>
+          <option value="1">Table 1</option>
+          <option value="2">Table 2</option>
+        </select>
+        <button id="historyRestoreBtn" style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">✅</button>
+        <button id="historyToggleBtn" class="toggle-btn" onclick="toggleHistory()" aria-expanded="true">
+          <span class="arrow">▾</span>
+          <span id="historyToggleLabel">Hide</span>
+        </button>
+      </div>
+    </div>
+    <div id="historyContent" class="collapsible-content">
+      <div id="historyList" class="owc-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- OWC LIST -->
+<div id="owcContainer" style="flex:1; min-width:280px;">
+  <div class="card">
+    <div class="collapsible-header" style="display:flex; align-items:center; justify-content:space-between;">
+      <h2 class="section-title" style="margin:0;font-size:1rem">OUT WHEN CALLED</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <select id="owcRestoreTable" style="padding:4px 8px; border-radius:6px;">
+          <option value="">Select Table</option>
+          <option value="1">Table 1</option>
+          <option value="2">Table 2</option>
+        </select>
+        <button id="owcRestoreBtn" style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">✅</button>
+        <button id="owcToggleBtn" class="toggle-btn" onclick="toggleOWC()" aria-expanded="true" title="Toggle OWC list">
+          <span class="arrow">▾</span>
+          <span id="owcToggleLabel">Hide</span>
+        </button>
+      </div>
+    </div>
+    <div id="owcContent" class="collapsible-content">
+      <div id="owcList" class="owc-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+/* -------------------- CONFIG -------------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDHTIJeBJEwELFfmLEHcs5Wvr9tlMSvLyw",
+  authDomain: "r2tmc-opd-ophtha-qs.firebaseapp.com",
+  databaseURL: "https://r2tmc-opd-ophtha-qs-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "r2tmc-opd-ophtha-qs",
+  storageBucket: "r2tmc-opd-ophtha-qs.firebasestorage.app",
+  messagingSenderId: "1046917289372",
+  appId: "1:1046917289372:web:65b5748464233290646459",
+  measurementId: "G-Z8XTRQEGPQ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* -------------------- STATE -------------------- */
+const TOTAL_TABLES = 2;
+let selectedTable = localStorage.getItem("selectedTable") || null;
+let prefixes = [];
+let seriesByPrefix = {};
+let owcList = [];
+let historyDoneList = [];
+
+/* -------------------- UTILS -------------------- */
+const toast = (msg) => {
+  const d = document.createElement("div");
+  d.className = "toast";
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3000);
+};
+
+const stringToColor = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+  return "#" + ("00000".substring(0, 6 - c.length) + c);
+};
+
+const parseQueueNumber = (numStr) => {
+  if (!numStr) return { prefix: "", number: 0 };
+  const [prefix, num] = numStr.split("-");
+  return { prefix, number: parseInt(num, 10) || 0 };
+};
+
+const sortQueueList = (list) => list.sort((a, b) => {
+  const aParsed = parseQueueNumber(a.number);
+  const bParsed = parseQueueNumber(b.number);
+  if (aParsed.prefix < bParsed.prefix) return -1;
+  if (aParsed.prefix > bParsed.prefix) return 1;
+  return aParsed.number - bParsed.number;
+});
+
+/* -------------------- TABLES -------------------- */
+const tableContainer = document.getElementById("tables");
+
+function renderTables() {
+  tableContainer.innerHTML = "";
+  for (let i = 1; i <= TOTAL_TABLES; i++) {
+    const tableName = `Table ${i}`;
+    const html = `
+      <div class="table-box" id="tableBox${i}">
+        <h2 style="margin:0">${tableName}</h2>
+        <select id="prefixSelect${i}" class="prefix-dropdown"></select>
+        <div id="num${i}" class="queue-number">-</div>
+        <div class="table-buttons">
+          <button id="doneBtn${i}" class="common done-btn">DONE</button>
+          <button id="nextBtn${i}" class="common next-btn">NEXT</button>
+          <button class="common owc-btn">OWC</button>
+          <button class="common recall-btn">RECALL</button>
+        </div>
+      </div>`;
+    tableContainer.insertAdjacentHTML("beforeend", html);
+  }
+
+  // Attach event delegation for table buttons
+  tableContainer.addEventListener("click", handleTableButtons);
+}
+
+function applyTablePermissions() {
+  for (let i = 1; i <= TOTAL_TABLES; i++) {
+    const box = document.getElementById(`tableBox${i}`);
+    box.style.display = (selectedTable === "all" || i === Number(selectedTable)) ? "block" : "none";
+  }
+  document.getElementById("historyContainer").style.display = (selectedTable === 6 || selectedTable === "all") ? "block" : "none";
+  document.getElementById("owcContainer").style.display = "block";
+}
+
+/* -------------------- TABLE BUTTON HANDLER -------------------- */
+function handleTableButtons(e) {
+  const tableBox = e.target.closest(".table-box");
+  if (!tableBox) return;
+
+  const i = parseInt(tableBox.id.replace("tableBox", ""));
+  if (e.target.classList.contains("next-btn")) nextQueue(i);
+  else if (e.target.classList.contains("done-btn")) doneQueue(i);
+  else if (e.target.classList.contains("owc-btn")) owcQueue(i);
+  else if (e.target.classList.contains("recall-btn")) recallQueue(i);
+}
+
+function getTableNumberEl(i) {
+  return document.getElementById(`num${i}`);
+}
+
+function updateTableButtons(i) {
+  const el = getTableNumberEl(i);
+  const occupied = el.textContent !== "-" && el.textContent !== "0";
+
+  tableContainer.querySelector(`#tableBox${i} .recall-btn`).disabled = !occupied;
+  tableContainer.querySelector(`#tableBox${i} .owc-btn`).disabled = !occupied;
+  document.getElementById(`nextBtn${i}`).disabled = occupied;
+}
+
+function pulseTable(i, type = "green") {
+  const box = document.getElementById(`tableBox${i}`);
+  if (!box) return;
+  const classMap = { green: "highlight", red: "pulse-owc", yellow: "pulse-restore" };
+  const cls = classMap[type] || "highlight";
+  box.classList.add(cls);
+  setTimeout(() => box.classList.remove(cls), 800);
+}
+
+function highlightTable(i) {
+  const box = document.getElementById(`tableBox${i}`);
+  if (!box) return;
+  box.classList.add("highlight");
+  setTimeout(() => box.classList.remove("highlight"), 1000);
+}
+
+/* -------------------- QUEUE OPERATIONS -------------------- */
+async function nextQueue(i) {
+  const prefix = document.getElementById(`prefixSelect${i}`).value;
+  if (!prefix) return toast("Select a prefix");
+
+  const el = getTableNumberEl(i);
+  if (el.textContent !== "-" && el.textContent !== "0") return toast(`Table ${i} is occupied`);
+
+  seriesByPrefix[prefix] = (seriesByPrefix[prefix] || 0) + 1;
+  const newNum = `${prefix}-${String(seriesByPrefix[prefix]).padStart(3, "0")}`;
+
+  el.textContent = newNum;
+
+  try {
+    await update(ref(db), {
+      [`tableNumbers/table${i}`]: newNum,
+      "prefixSeries": seriesByPrefix
+    });
+    updateTableButtons(i);
+    highlightTable(i);
+  } catch (err) {
+    console.error(err);
+    toast("Error updating table");
+  }
+}
+
+async function doneQueue(i) {
+  const el = getTableNumberEl(i);
+  const num = el.textContent;
+  if (num && num !== "-" && num !== "0") {
+    try { await push(ref(db, "historyDone"), { number: num, table: i, timestamp: Date.now() }); }
+    catch { toast("Failed to log history"); }
+  }
+  el.textContent = "-";
+  try { await set(ref(db, `tableNumbers/table${i}`), "-"); } catch { toast("Failed to reset table"); }
+  updateTableButtons(i);
+  highlightTable(i);
+}
+
+window.owcQueue = function(i) {
+  const el = document.getElementById("num" + i);
+  const currentNum = el.textContent;
+  if (!currentNum || currentNum === "-" || currentNum === "0") return;
+
+  // Push current number to OWC list
+  push(ref(db, "owc"), { table: i, number: currentNum, time: Date.now() });
+
+  // Get the current prefix
+  const prefix = document.getElementById("prefixSelect" + i).value;
+  if (!prefix) { toast("Select a prefix"); return; }
+
+  // Increment the prefix series
+  if (!seriesByPrefix[prefix]) seriesByPrefix[prefix] = 0;
+  seriesByPrefix[prefix]++;
+  const nextNum = `${prefix}-${String(seriesByPrefix[prefix]).padStart(3, "0")}`;
+
+  // Update the table with the next number
+  el.textContent = nextNum;
+
+  // Sync with Firebase
+  set(ref(db, "tableNumbers/table" + i), nextNum);
+  set(ref(db, "prefixSeries"), seriesByPrefix);
+
+  // Update UI & highlight
+  updateTableButtons(i);
+  pulseTable(i, "red");
+};
+
+
+async function recallQueue(i) {
+  const el = getTableNumberEl(i);
+  const num = el?.textContent;
+  if (!num || num === "-" || num === "0") return;
+
+  const tableBox = document.getElementById(`tableBox${i}`);
+  tableBox.classList.add("pulse");
+  setTimeout(() => tableBox.classList.remove("pulse"), 1000);
+
+  try { await push(ref(db, "recallEvents"), { table: i, number: num, timestamp: Date.now() }); }
+  catch { toast("Failed to log recall"); }
+}
+
+/* -------------------- RESTORE FUNCTIONS -------------------- */
+async function restoreQueueItem(item, tableNumber, type = "owc") {
+  const el = getTableNumberEl(tableNumber);
+  if (!el) return toast("Invalid table");
+  if (el.textContent !== "-" && el.textContent !== "0") return toast(`Table ${tableNumber} is already occupied`);
+
+  el.textContent = item.number;
+  try {
+    await set(ref(db, `tableNumbers/table${tableNumber}`), item.number);
+    updateTableButtons(tableNumber);
+    pulseTable(tableNumber, "yellow");
+    await remove(ref(db, `${type}/${item.key}`));
+  } catch {
+    toast("Failed to restore number");
+  }
+}
+
+/* -------------------- LIST RENDER -------------------- */
+function renderQueueList(list, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  sortQueueList(list).forEach(item => {
+    const div = document.createElement("div");
+    div.className = "owc-item";
+    div.dataset.table = item.table;
+    div.textContent = item.number;
+    container.appendChild(div);
+  });
+}
+/* -------------------- ADD CLICK TO HIGHLIGHT -------------------- */
+function addClickToHighlight(containerId) {
+  const container = document.getElementById(containerId);
+  container.addEventListener("click", (e) => {
+    const el = e.target.closest(".owc-item");
+    if (!el) return;
+
+    // Remove previous selections
+    container.querySelectorAll(".owc-item").forEach(item => item.classList.remove("selected"));
+
+    // Add selected class
+    el.classList.add("selected");
+  });
+}
+
+// Apply to both lists
+addClickToHighlight("historyList");
+addClickToHighlight("owcList");
+
+/* -------------------- RESTORE BUTTONS -------------------- */
+document.getElementById("owcRestoreBtn").onclick = () => {
+  const selected = document.querySelector("#owcList .owc-item.selected");
+  const tableNumber = parseInt(document.getElementById("owcRestoreTable").value);
+  if (!selected) return toast("Select a number");
+  if (!tableNumber) return toast("Select a table");
+
+  const item = owcList.find(i => i.number === selected.textContent);
+  if (item) restoreQueueItem(item, tableNumber, "owc");
+};
+
+document.getElementById("historyRestoreBtn").onclick = () => {
+  const selected = document.querySelector("#historyList .owc-item.selected");
+  const tableNumber = parseInt(document.getElementById("historyRestoreTable").value);
+  if (!selected) return toast("Select a number");
+  if (!tableNumber) return toast("Select a table");
+
+  const item = historyDoneList.find(i => i.number === selected.textContent);
+  if (item) restoreQueueItem(item, tableNumber, "historyDone");
+};
+/* -------------------- COLLAPSIBLE SECTIONS -------------------- */
+function toggleSection(contentId, btnId, labelId) {
+  const content = document.getElementById(contentId);
+  const arrow = document.getElementById(btnId)?.querySelector(".arrow");
+  const label = document.getElementById(labelId);
+  if (!content || !arrow || !label) return;
+
+  content.classList.toggle("collapsed");
+  arrow.classList.toggle("collapsed");
+  label.textContent = content.classList.contains("collapsed") ? "Show" : "Hide";
+}
+
+// Attach toggles to window so they can be used by buttons
+window.toggleHistory = () => toggleSection("historyContent", "historyToggleBtn", "historyToggleLabel");
+window.toggleOWC = () => toggleSection("owcContent", "owcToggleBtn", "owcToggleLabel");
+window.toggleHeader = () => {
+  const header = document.getElementById("headerBar");
+  const icon = document.getElementById("headerToggleIcon");
+  if (!header || !icon) return;
+
+  header.classList.toggle("collapsed");
+  icon.style.transform = header.classList.contains("collapsed") ? "rotate(-90deg)" : "rotate(0deg)";
+};
+
+/* -------------------- FIREBASE LISTENERS -------------------- */
+onValue(ref(db, "settings/prefixes"), snap => {
+  prefixes = snap.exists() ? snap.val() : [];
+  document.getElementById("prefixInput").value = prefixes.join(",");
+  for (let i = 1; i <= TOTAL_TABLES; i++) {
+    const sel = document.getElementById(`prefixSelect${i}`);
+    sel.innerHTML = "";
+    prefixes.forEach(p => {
+      const o = document.createElement("option");
+      o.value = o.textContent = p;
+      sel.appendChild(o);
+    });
+  }
+});
+
+onValue(ref(db, "prefixSeries"), snap => seriesByPrefix = snap.exists() ? snap.val() : {});
+
+for (let i = 1; i <= TOTAL_TABLES; i++) {
+  onValue(ref(db, `tableNumbers/table${i}`), snap => {
+    const val = snap.exists() ? snap.val() : "-";
+    document.getElementById(`num${i}`).textContent = val;
+    updateTableButtons(i);
+  });
+}
+
+onValue(ref(db, "owc"), snap => {
+  owcList = snap.exists() ? Object.entries(snap.val()).map(([key, val]) => ({ key, ...val })) : [];
+  renderQueueList(owcList, "owcList");
+});
+
+onValue(ref(db, "historyDone"), snap => {
+  historyDoneList = snap.exists() ? Object.entries(snap.val()).map(([key, val]) => ({ key, ...val })) : [];
+  renderQueueList(historyDoneList, "historyList");
+});
+/* -------------------- TABLE SELECTION -------------------- */
+function showTableSelectionOverlay() {
+  const overlay = document.getElementById("userMenuOverlay");
+  overlay.style.display = "flex";
+}
+
+window.confirmTableSelection = function () {
+  const chosen = document.getElementById("tableSelectMenu").value;
+  if (!chosen) { toast("Please select a table."); return; }
+
+  selectedTable = (chosen === "all") ? "all" : parseInt(chosen);
+  localStorage.setItem("selectedTable", selectedTable);
+
+  applyTablePermissions();
+  document.getElementById("userMenuOverlay").style.display = "none"; // hide overlay
+}
+/* -------------------- SETTINGS MODAL -------------------- */
+window.showSettings = () => {
+  const overlay = document.getElementById("modalOverlay");
+  if (overlay) overlay.style.display = "flex";
+};
+
+window.closeSettings = () => {
+  const overlay = document.getElementById("modalOverlay");
+  if (overlay) overlay.style.display = "none";
+};
+
+/* Save prefixes to Firebase */
+window.savePrefix = () => {
+  const inputEl = document.getElementById("prefixInput");
+  if (!inputEl) return toast("Prefix input not found");
+
+  const prefixes = inputEl.value
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  if (prefixes.length === 0) return toast("Enter at least one prefix");
+
+  set(ref(db, "settings/prefixes"), prefixes)
+    .then(() => {
+      toast("Prefixes saved successfully");
+      closeSettings();
+    })
+    .catch(err => toast("Error saving prefixes: " + err.message));
+};
+
+/* -------------------- Load prefixes into input -------------------- */
+onValue(ref(db, "settings/prefixes"), snap => {
+  const data = snap.exists() ? snap.val() : [];
+  prefixes = data;
+  const inputEl = document.getElementById("prefixInput");
+  if (inputEl) inputEl.value = data.join(",");
+ 
+  // Also update all dropdowns
+  for (let i = 1; i <= TOTAL_TABLES; i++) {
+    const sel = document.getElementById("prefixSelect" + i);
+    if (!sel) continue;
+    sel.innerHTML = "";
+    prefixes.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      opt.textContent = p;
+      sel.appendChild(opt);
+    });
+  }
+});
+/* -------------------- RESET QUEUES -------------------- */
+window.resetQueues = async () => {
+  if (!confirm("Reset all queues & OWC?")) return;
+
+  try {
+    // Clear all tables
+    for (let i = 1; i <= TOTAL_TABLES; i++) {
+      document.getElementById("num" + i).textContent = "-";
+      await set(ref(db, "tableNumbers/table" + i), "-");
+    }
+
+    // Clear OWC and History lists
+    await remove(ref(db, "owc"));
+    await remove(ref(db, "historyDone"));
+
+    // Reset series counts
+    await set(ref(db, "prefixSeries"), {});
+
+    // Clear local state
+    owcList = [];
+    historyDoneList = [];
+    seriesByPrefix = {};
+
+    toast("Queues reset successfully");
+  } catch (err) {
+    toast("Error resetting queues: " + err.message);
+  }
+};
+/* -------------------- CHANGE TABLE -------------------- */
+window.changeTable = function() {
+  // Show table selection overlay
+  const overlay = document.getElementById("userMenuOverlay");
+  overlay.style.display = "flex";
+
+  // Reset dropdown
+  const menu = document.getElementById("tableSelectMenu");
+  if (menu) menu.value = "";
+
+  // Close settings modal if open
+  closeSettings();
+};
+
+/* -------------------- INITIAL LOAD -------------------- */
+renderTables();
+
+if (!selectedTable) {
+  showTableSelectionOverlay(); // Show overlay if no table is selected
+} else {
+  applyTablePermissions(); // Otherwise apply saved table permissions
+}
+</script>
+</body>
+</html>
