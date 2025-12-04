@@ -1080,7 +1080,7 @@ let owcList = [];
 let historyDoneList = [];
 const table1Ref = ref(db, "tableNumbers/table1");
 const table2Ref = ref(db, "tableNumbers/table2");
-
+const checkboxStates = JSON.parse(localStorage.getItem('checkboxStates')) || {};
 /* -------------------- UTILS -------------------- */
 const toast = (msg) => {
   const d = document.createElement("div");
@@ -1295,20 +1295,61 @@ async function restoreQueueItem(item, tableNumber, type = "owc") {
     toast("Failed to restore number");
   }
 }
+function saveCheckboxStates() {
+  localStorage.setItem('checkboxStates', JSON.stringify(checkboxStates));
+}
 
 /* -------------------- LIST RENDER -------------------- */
-function renderQueueList(list, containerId) {
+function renderQueueList(list, containerId, listType = "owc") {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
   sortQueueList(list).forEach(item => {
     const div = document.createElement("div");
     div.className = "owc-item";
     div.dataset.table = item.table;
-    div.textContent = item.number;
+
+    if (listType === "history") {
+      // Create checkbox only for history list
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "history-checkbox";
+
+      // Set checkbox state from localStorage data
+      const key = item.key || item.number; // use key if available, else number
+      checkbox.checked = checkboxStates[key] || false;
+
+      // Add event listener to update stored state
+      checkbox.addEventListener("change", () => {
+        const key = item.key || item.number;
+        checkboxStates[key] = checkbox.checked;
+        saveCheckboxStates();
+
+        if (checkbox.checked) {
+          set(ref(db, `checkedHistoryNumbers/${item.key}`), { number: item.number, timestamp: Date.now() });
+        } else {
+          remove(ref(db, `checkedHistoryNumbers/${item.key}`));
+        }
+      });
+
+      // Create span for the number
+      const numberSpan = document.createElement("span");
+      numberSpan.className = "number-cell";
+      numberSpan.textContent = item.number;
+
+      // Append checkbox and number to the item div
+      div.appendChild(checkbox);
+      div.appendChild(numberSpan);
+    } else {
+      // For OWC, just show the number
+      const numberSpan = document.createElement("span");
+      numberSpan.className = "number-cell";
+      numberSpan.textContent = item.number;
+      div.appendChild(numberSpan);
+    }
+
     container.appendChild(div);
   });
-}
-/* -------------------- ADD CLICK TO HIGHLIGHT -------------------- */
+}/* -------------------- ADD CLICK TO HIGHLIGHT -------------------- */
 function addClickToHighlight(containerId) {
   const container = document.getElementById(containerId);
   container.addEventListener("click", (e) => {
@@ -1398,12 +1439,12 @@ for (let i = 1; i <= TOTAL_TABLES; i++) {
 
 onValue(ref(db, "owc"), snap => {
   owcList = snap.exists() ? Object.entries(snap.val()).map(([key, val]) => ({ key, ...val })) : [];
-  renderQueueList(owcList, "owcList");
+  renderQueueList(owcList, "owcList", "owc");
 });
 
 onValue(ref(db, "historyDone"), snap => {
   historyDoneList = snap.exists() ? Object.entries(snap.val()).map(([key, val]) => ({ key, ...val })) : [];
-  renderQueueList(historyDoneList, "historyList");
+  renderQueueList(historyDoneList, "historyList", "history");
 });
 /* -------------------- TABLE SELECTION -------------------- */
 function showTableSelectionOverlay() {
@@ -1489,6 +1530,9 @@ window.resetQueues = async () => {
 
     // Reset series counts
     await set(ref(db, "prefixSeries"), {});
+
+    // Clear checked history numbers
+    await remove(ref(db, "checkedHistoryNumbers"));
 
     // Clear local state
     owcList = [];
