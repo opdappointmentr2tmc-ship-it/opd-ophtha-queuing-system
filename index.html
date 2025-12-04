@@ -168,7 +168,7 @@ h1 {
   width: 100%;               /* fill parent width */
   box-sizing: border-box;    /* include padding in width */
 }
-
+	
 
 /* ===== BUTTONS ===== */
 button.common {
@@ -272,7 +272,7 @@ h2.section-title {
   flex-shrink: 0;
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 20px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -752,9 +752,87 @@ h2.section-title {
 .owc-item.selected {
   background: #b2e7a9;
 }
+/* ---------------------------
+   Referral List Container
+--------------------------- */
+/* Referral container card like other lists */
+#referralContainer .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
 
+/* Referral list inner scroll */
+#referralList {
+    background: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    max-height: 260px;
+    overflow-y: auto;
 
+    display: flex;
+    flex-wrap: wrap;       /* allow multiple columns */
+    gap: 6px;              /* space between items */
+}
 
+/* Referral list items styled like OWC/History */
+#referralList .owc-item {
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1 1 calc(25% - 6px); /* 4 columns */
+    box-sizing: border-box;
+    transition: background 0.15s ease, border 0.15s ease;
+}
+
+/* Hover effect like other lists */
+#referralList .owc-item:hover {
+    background: #f7f7f7;
+}
+
+/* Selected highlight like OWC/History */
+#referralList .owc-item.selected {
+    background: #cfe8ff !important;
+    border-color: #4aa3ff;
+}
+
+/* Delete button style */
+.ref-del-btn {
+    background: #db3445;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    margin-left: 10px;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.ref-del-btn:hover {
+    opacity: 1;
+}
+/* ---------------------------
+   Optional: Flex wrap numbers like OWC/History
+--------------------------- */
+#referralList.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#referralList.flex-wrap .owc-item {
+    min-width: 70px; /* fixed width for column-style display */
+    flex: 1 0 auto;
+}
 </style>
 </head>
 <body>
@@ -768,117 +846,215 @@ h2.section-title {
     height:100%;
     background:rgba(0,0,0,0.5);
     z-index:1001;
-    display:flex;
     align-items:center;
     justify-content:center;
 ">
   <div id="userMenuBox" style="background:#fff; padding:20px; border-radius:10px; width:300px; max-width:90%;">
     <h2>Select Your Table</h2>
+
     <select id="tableSelectMenu" style="width:100%;padding:10px;margin-top:10px;border-radius:8px;font-size:16px">
       <option value="">-- Choose Table --</option>
       <option value="1">Table 1</option>
       <option value="2">Table 2</option>
       <option value="all">Nurse Station (Show All Tables)</option>
     </select>
-    <button class="small-btn" style="margin-top:14px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:800" onclick="confirmTableSelection()">Continue</button>
+
+    <button class="small-btn"
+            style="margin-top:14px;background:var(--primary);color:#fff;
+                   border:none;border-radius:8px;padding:10px 18px;font-weight:800"
+            onclick="confirmTableSelection()">
+      Continue
+    </button>
   </div>
 </div>
 
 
 
 <!-- SETTINGS MODAL -->
-<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+<div id="modalOverlay" style="
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;
+">
   <div id="modalBox" style="background:#fff; padding:20px; border-radius:10px; width:300px; max-width:90%;">
     <h2>Settings</h2>
 
     <label style="display:block;margin-top:10px">Custom Prefixes (comma separated)</label>
-    <input id="prefixInput" type="text" value="GM" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc">
-    <div class="settings-buttons" style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
-      <button onclick="savePrefix()" style="background:var(--primary); color:#fff; padding:10px; border:none; border-radius:8px;">SAVE PREFIXES</button>
-      <button onclick="resetQueues()" style="background:var(--danger); color:#fff; padding:10px; border:none; border-radius:8px;">RESET QUEUES & OWC</button>
-      <button onclick="changeTable()" style="background:#17a2b8; color:#fff; padding:10px; border:none; border-radius:8px;">CHANGE TABLE</button>
-      <button onclick="closeSettings()" style="background:var(--success); color:#fff; padding:10px; border:none; border-radius:8px;">CLOSE</button>
+    <input id="prefixInput" type="text" value="GM"
+           style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc">
+
+    <div class="settings-buttons"
+         style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+      <button onclick="savePrefix()" style="background:var(--primary); color:#fff; padding:10px; border:none; border-radius:8px;">
+        SAVE PREFIXES
+      </button>
+
+      <button onclick="resetQueues()" style="background:var(--danger); color:#fff; padding:10px; border:none; border-radius:8px;">
+        RESET QUEUES & OWC
+      </button>
+
+      <button onclick="changeTable()" style="background:#17a2b8; color:#fff; padding:10px; border:none; border-radius:8px;">
+        CHANGE TABLE
+      </button>
+
+      <button onclick="closeSettings()" style="background:var(--success); color:#fff; padding:10px; border:none; border-radius:8px;">
+        CLOSE
+      </button>
     </div>
   </div>
 </div>
+
 
 
 <!-- HEADER & SETTINGS BUTTON -->
 <div id="headerBar">
   <h1>Ophthalmology Clinic Queueing System</h1>
-  <button id="settingsButton" onclick="showSettings()" style="padding:8px 12px; border-radius:8px; background:#17a2b8; color:#fff; border:none;">Settings ⚙️</button>
+  <button id="settingsButton" onclick="showSettings()"
+          style="padding:8px 12px; border-radius:8px; background:#17a2b8; color:#fff; border:none;">
+    Settings ⚙️
+  </button>
 </div>
 
 <!-- OPTIONAL HEADER TOGGLE BUTTON -->
 <div style="margin-bottom:12px;">
-  <button id="headerToggleBtn" class="small-btn" onclick="toggleHeader()" style="background:#17a2b8;color:#fff;display:flex;align-items:center;justify-content:center;">
+  <button id="headerToggleBtn" class="small-btn" onclick="toggleHeader()"
+          style="background:#17a2b8;color:#fff;display:flex;align-items:center;justify-content:center;">
     <span id="headerToggleIcon" style="display:inline-block;transition: transform 0.4s ease;">▾</span>
   </button>
 </div>
 
+
+
 <!-- MAIN CONTAINER -->
 <div id="tablesContainer">
 
- <!-- MAIN TABLES GRID -->
-<div id="tables"></div>
+  <!-- MAIN TABLES GRID -->
+  <div id="tables"></div>
 
-<!-- BOTTOM PANELS: History Done & OWC side by side -->
-<div id="bottomListsContainer" style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
-  <!-- HISTORY DONE -->
-<div id="historyContainer" style="flex:1; min-width:280px;">
+
+  <!-- BOTTOM PANELS: History, OWC, Referral -->
+  <div id="bottomListsContainer"
+       style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+
+
+    <!-- HISTORY DONE -->
+    <div id="historyContainer" style="flex:1; min-width:280px;">
+      <div class="card">
+        <div class="collapsible-header" style="display:flex; align-items:center; justify-content:space-between;">
+          <h2 class="section-title">HISTORY DONE</h2>
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select id="historyRestoreTable" style="padding:4px 8px; border-radius:6px;">
+              <option value="">Select Table</option>
+              <option value="1">Table 1</option>
+              <option value="2">Table 2</option>
+            </select>
+
+            <button id="historyRestoreBtn"
+                    style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">
+              ✅
+            </button>
+
+            <button id="historyToggleBtn" class="toggle-btn" onclick="toggleHistory()" aria-expanded="true">
+              <span class="arrow">▾</span>
+              <span id="historyToggleLabel">Hide</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="historyContent" class="collapsible-content">
+          <div id="historyList" class="owc-list"></div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- OWC LIST -->
+    <div id="owcContainer" style="flex:1; min-width:280px;">
+      <div class="card">
+        <div class="collapsible-header" style="display:flex; align-items:center; justify-content:space-between;">
+          <h2 class="section-title" style="margin:0;font-size:1rem">OUT WHEN CALLED</h2>
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select id="owcRestoreTable" style="padding:4px 8px; border-radius:6px;">
+              <option value="">Select Table</option>
+              <option value="1">Table 1</option>
+              <option value="2">Table 2</option>
+            </select>
+
+            <button id="owcRestoreBtn"
+                    style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">
+              ✅
+            </button>
+
+            <button id="owcToggleBtn" class="toggle-btn" onclick="toggleOWC()" aria-expanded="true">
+              <span class="arrow">▾</span>
+              <span id="owcToggleLabel">Hide</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="owcContent" class="collapsible-content">
+          <div id="owcList" class="owc-list"></div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- REFERRAL LIST (Placed beside Table 2 exactly) -->
+  <div id="referralContainer" style="flex:1; min-width:280px;">
   <div class="card">
     <div class="collapsible-header" style="display:flex; align-items:center; justify-content:space-between;">
-      <h2 class="section-title">History Done List</h2>
+      <h2 class="section-title" style="margin:0;font-size:1rem">REFERRALS</h2>
+
       <div style="display:flex; gap:8px; align-items:center;">
-        <select id="historyRestoreTable" style="padding:4px 8px; border-radius:6px;">
+        <select id="referralRestoreTable" style="padding:4px 8px; border-radius:6px;">
           <option value="">Select Table</option>
           <option value="1">Table 1</option>
           <option value="2">Table 2</option>
         </select>
-        <button id="historyRestoreBtn" style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">✅</button>
-        <button id="historyToggleBtn" class="toggle-btn" onclick="toggleHistory()" aria-expanded="true">
+
+        <button id="referralRestoreBtn" style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">
+          ✅ 
+        </button>
+
+        <button id="referralToggleBtn" class="toggle-btn" onclick="toggleReferral()" aria-expanded="true">
           <span class="arrow">▾</span>
-          <span id="historyToggleLabel">Hide</span>
+          <span id="referralToggleLabel">Hide</span>
         </button>
       </div>
     </div>
-    <div id="historyContent" class="collapsible-content">
-      <div id="historyList" class="owc-list"></div>
+
+    <div id="referralContent" class="collapsible-content">
+
+      <!-- INPUT stays at top -->
+      <div style="margin-bottom:10px; display:flex; gap:6px;">
+        <input id="referralInput" type="text" placeholder="Enter referral number (ex: GS-001)"
+               style="flex:1; padding:6px; border-radius:6px; border:1px solid #ccc">
+        <button id="addReferralBtn" style="background:#17a2b8; color:#fff; border:none; border-radius:6px; padding:6px 12px;">
+          Add
+        </button>
+      </div>
+
+      <!-- LIST stays under input -->
+      <div id="referralList" class="owc-list"></div>
+
     </div>
   </div>
 </div>
 
-<!-- OWC LIST -->
-<div id="owcContainer" style="flex:1; min-width:280px;">
-  <div class="card">
-    <div class="collapsible-header" style="display:flex; align-items:center; justify-content:space-between;">
-      <h2 class="section-title" style="margin:0;font-size:1rem">OUT WHEN CALLED</h2>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <select id="owcRestoreTable" style="padding:4px 8px; border-radius:6px;">
-          <option value="">Select Table</option>
-          <option value="1">Table 1</option>
-          <option value="2">Table 2</option>
-        </select>
-        <button id="owcRestoreBtn" style="padding:4px 8px; border-radius:6px;background:#37bd5a; color:#fff; border:none;">✅</button>
-        <button id="owcToggleBtn" class="toggle-btn" onclick="toggleOWC()" aria-expanded="true" title="Toggle OWC list">
-          <span class="arrow">▾</span>
-          <span id="owcToggleLabel">Hide</span>
-        </button>
-      </div>
-    </div>
-    <div id="owcContent" class="collapsible-content">
-      <div id="owcList" class="owc-list"></div>
-    </div>
+
+    <div id="toastContainer"></div>
+
   </div>
 </div>
-
-<div id="toastContainer"></div>
 
 
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
 /* -------------------- CONFIG -------------------- */
 const firebaseConfig = {
@@ -894,7 +1070,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
+const referralDB = ref(db, "referrals");
 /* -------------------- STATE -------------------- */
 const TOTAL_TABLES = 2;
 let selectedTable = localStorage.getItem("selectedTable") || null;
@@ -902,6 +1078,8 @@ let prefixes = [];
 let seriesByPrefix = {};
 let owcList = [];
 let historyDoneList = [];
+const table1Ref = ref(db, "tableNumbers/table1");
+const table2Ref = ref(db, "tableNumbers/table2");
 
 /* -------------------- UTILS -------------------- */
 const toast = (msg) => {
@@ -964,8 +1142,18 @@ function applyTablePermissions() {
     const box = document.getElementById(`tableBox${i}`);
     box.style.display = (selectedTable === "all" || i === Number(selectedTable)) ? "block" : "none";
   }
-  document.getElementById("historyContainer").style.display = (selectedTable === 6 || selectedTable === "all") ? "block" : "none";
+
+  // History container (optional, adjust as needed)
+  document.getElementById("historyContainer").style.display = (selectedTable === "all") ? "block" : "none";
+
+  // OWC list always visible
   document.getElementById("owcContainer").style.display = "block";
+
+  // Referral list visible ONLY in Nurse Station (assume ID = 3)
+  const referralContainer = document.getElementById("referralContainer");
+  if (referralContainer) {
+    referralContainer.style.display = (selectedTable === "all") ? "block" : "none";
+  }
 }
 
 /* -------------------- TABLE BUTTON HANDLER -------------------- */
@@ -1334,6 +1522,204 @@ if (!selectedTable) {
 } else {
   applyTablePermissions(); // Otherwise apply saved table permissions
 }
+
+
+/* ---------------------------
+   CATEGORY COLOR TAGGING
+--------------------------- */
+function getReferralTag(number) {
+  const prefix = number.split("-")[0].toUpperCase();
+
+  if (prefix === "GS") return `<span class="ref-tag tag-gs">GS</span>`;
+  if (prefix === "OB") return `<span class="ref-tag tag-ob">OB</span>`;
+  if (prefix === "GM") return `<span class="ref-tag tag-gm">GM</span>`;
+
+  return `<span class="ref-tag tag-default">${prefix}</span>`;
+}
+
+/* ---------------------------
+   RENDER REFERRALS IN COLUMNS
+--------------------------- */
+function renderReferrals(referrals) {
+    const container = document.getElementById("referralList");
+    container.innerHTML = "";
+
+    // Sort numerically by prefix and number
+    referrals.sort((a, b) => {
+        const [preA, numA] = a.number.split("-");
+        const [preB, numB] = b.number.split("-");
+        if (preA < preB) return -1;
+        if (preA > preB) return 1;
+        return parseInt(numA, 10) - parseInt(numB, 10);
+    });
+
+    referrals.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "owc-item"; // same as OWC/History
+        div.dataset.number = item.number;
+        div.dataset.key = item.key;
+
+        div.innerHTML = `
+            <span class="number-cell">${item.number}</span>
+            <button class="delete-btn" data-del="${item.key}">✕</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+
+/* ---------------------------
+   ADD REFERRAL
+--------------------------- */
+async function addReferral() {
+  const input = document.getElementById("referralInput");
+  const val = input.value.trim();
+
+  if (!val) return toast("Enter a referral number");
+
+  const newRef = push(referralDB);
+  await set(newRef, {
+    number: val,
+    timestamp: Date.now()
+  });
+
+  input.value = "";
+}
+
+
+/* ---------------------------
+   DELETE REFERRAL
+--------------------------- */
+async function deleteReferral(key) {
+  await remove(ref(db, "referrals/" + key));
+}
+
+
+
+/* ---------------------------
+   RESTORE SELECTED REFERRAL
+--------------------------- */
+async function restoreReferral() {
+    const selectedItem = document.querySelector("#referralList .owc-item.selected");
+    const table = document.getElementById("referralRestoreTable").value;
+
+    if (!selectedItem) return toast("Select a referral first");
+    if (!table) return toast("Select a table");
+
+    const selectedNumber = selectedItem.dataset.number;
+    const referral = referralList.find(r => r.number === selectedNumber);
+    if (!referral) return;
+
+    const tableRef = ref(db, `tableNumbers/table${table}`);
+    const snap = await get(tableRef);
+
+    // 🛑 NEW PERFECT CHECK (NO MORE FAILURES)
+    const value = snap.val();
+
+    if (value !== null && value !== "" && value !== undefined && value !== "-") {
+        return toast(`Table ${table} is still occupied. Clear it first.`);
+    }
+
+    // 🟢 Restore if empty
+    await set(tableRef, referral.number);
+    await deleteReferral(referral.key);
+
+    toast(`Restored ${referral.number} to Table ${table}`);
+}
+
+
+/* ---------------------------
+   CLICK-TO-SELECT & DELETE HANDLERS
+--------------------------- */
+document.getElementById("referralList").addEventListener("click", e => {
+  const del = e.target.dataset.del;
+  if (del) return deleteReferral(del);
+
+  const item = e.target.closest(".referral-item");
+  if (!item) return;
+
+  document.querySelectorAll(".referral-item")
+    .forEach(i => i.classList.remove("selected"));
+
+  item.classList.add("selected");
+});
+
+
+/* ---------------------------
+   REALTIME FIREBASE SYNC
+--------------------------- */
+let referralList = [];
+
+/* ---------------------------
+   RENDER REFERRAL LIST (WITH FLEX-WRAP)
+--------------------------- */
+onValue(referralDB, snap => {
+  referralList = snap.exists()
+    ? Object.entries(snap.val()).map(([key, val]) => ({ ...val, key }))
+    : [];
+
+  // Sort numerically / alphabetically
+  referralList.sort((a, b) => a.number.localeCompare(b.number));
+
+  const container = document.getElementById("referralList");
+  container.innerHTML = "";
+  container.classList.add("flex-wrap"); // enable column-style layout
+
+  referralList.forEach(item => {
+    const prefix = item.number.split("-")[0];
+    const color = stringToColor(prefix);
+
+    const div = document.createElement("div");
+    div.className = "owc-item";
+    div.dataset.number = item.number;
+
+    div.innerHTML = `
+      <span class="ref-tag" style="background:${color};">${prefix}</span>
+      ${item.number}
+      <button class="ref-del-btn" data-del="${item.key}">✕</button>
+    `;
+
+    container.appendChild(div);
+  });
+});
+/* ---------------------------
+   EVENT LISTENERS
+--------------------------- */
+document.getElementById("addReferralBtn").addEventListener("click", addReferralToList);
+document.getElementById("referralRestoreBtn").addEventListener("click", restoreReferral);
+
+document.getElementById("referralList").addEventListener("click", (e) => {
+  const del = e.target.dataset.del;
+  if (del) return deleteReferral(del);
+
+  const item = e.target.closest(".owc-item");
+  if (!item) return;
+
+  document.querySelectorAll("#referralList .owc-item").forEach(el => el.classList.remove("selected"));
+  item.classList.add("selected");
+});
+
+
+// Make toggle available globally
+window.toggleReferral = () => toggleSection("referralContent", "referralToggleBtn", "referralToggleLabel");
+async function addReferralToList() {
+  const input = document.getElementById("referralInput");
+  const num = input.value.trim().toUpperCase();
+
+  if (!num) return toast("Enter referral number");
+
+  const timestamp = Date.now();
+  const key = `${timestamp}-${Math.floor(Math.random()*999)}`;
+
+  await push(referralDB, {
+    number: num,
+    timestamp,
+    key
+  });
+
+  input.value = "";
+}
+
 </script>
 </body>
 </html>
