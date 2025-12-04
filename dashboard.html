@@ -11,208 +11,255 @@
     background: linear-gradient(135deg,#e6e8eb,#cfd3d6);
     overflow: hidden; display: flex; flex-direction: column;
   }
-/* --------- HEADER --------- */
-#topHeader {
-  background: #4CAF50;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2px 5px; /* reduced padding */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08); /* smaller shadow */
-  height: 100px; /* fixed smaller height */
-}
-
-#headerCenter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0;
-}
-
-#headerRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px; /* smaller gap */
-}
-
-#headerTitle {
-  font-size: 1.7em;   /* slightly bigger */
-  font-weight: 900;   /* bold */
-  text-align: center;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
-  white-space: nowrap;
-}
-
-#headerClock {
-  font-size: 1.3em;   /* slightly bigger */
-  font-weight: 700;   /* bold */
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
-  margin-top: 2px;
-}
-#headerLogoLeft,
-#headerLogoRight {
+  /* --------- HEADER --------- */
+  #topHeader {
+    background: #4CAF50;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2px 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    height: 100px;
+  }
+  #headerCenter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
+  #headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  #headerTitle {
+    font-size: 1.7em;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+    white-space: nowrap;
+  }
+  #headerClock {
+    font-size: 1.3em;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+    margin-top: 2px;
+  }
+  #headerLogoLeft,
+  #headerLogoRight {
     height: 45px; 
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.2));
-}
-
-/* Responsive tweaks */
-@media (max-width:900px){
-  #headerTitle { font-size: 1.3em; }
-  #headerLogoLeft, #headerLogoRight { height: 35px; }
-  #headerClock { font-size: 1em; }
-}
-@media (max-width:600px){
-  #headerTitle { font-size: 1.1em; }
-  #headerLogoLeft, #headerLogoRight { height: 30px; }
-  #headerClock { font-size: 0.9em; }
-}
-@media (max-width:500px){
-  #headerTitle { font-size: 1em; }
-  #headerLogoLeft, #headerLogoRight { height: 25px; }
-  #headerClock { font-size: 0.8em; }
-}
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.2));
+  }
+  @media (max-width:900px){
+    #headerTitle { font-size: 1.3em; }
+    #headerLogoLeft, #headerLogoRight { height: 35px; }
+    #headerClock { font-size: 1em; }
+  }
+  @media (max-width:600px){
+    #headerTitle { font-size: 1.1em; }
+    #headerLogoLeft, #headerLogoRight { height: 30px; }
+    #headerClock { font-size: 0.9em; }
+  }
+  @media (max-width:500px){
+    #headerTitle { font-size: 1em; }
+    #headerLogoLeft, #headerLogoRight { height: 25px; }
+    #headerClock { font-size: 0.8em; }
+  }
 
   /* --------- MAIN LAYOUT --------- */
   #mainContainer { display:flex; flex-direction:column; gap:10px; padding:10px 20px; flex:1 1 auto; overflow:hidden; }
-#gridsContainer {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  flex: 1;
-}
-#centerPanel {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* 50% / 50% */
-  gap: 15px;
-  width: 100%;
-  flex: 1;
-}
-.queue-number-consult {
-  display: flex;
-  flex-direction: column; /* vertical layout */
-  justify-content: flex-start; /* start from top */
-  align-items: center; /* center items horizontally */
-  width: 100%;
-  height: 100%; /* fill the parent container */
-  padding: 10px; /* optional padding */
-  box-sizing: border-box;
-  position: relative;
-}
-
-.queue-number-consult .prefix {
-  font-size: 2em; 
-  margin-top: 10px; /* space from top of container */
-  margin-bottom: 5px; /* space below prefix */
-  position: absolute; /* fix at top inside container */
-  top: 10px;
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-  background: transparent; /* optional if you want it transparent */
-}
-
-.queue-number-consult .main-number {
-  font-size: clamp(7rem, 25vw, 12rem);
-  font-weight: 900;
-  margin-top: 50px; /* space below prefix, adjust as needed */
-}
- .queue-number.pulse, .queue-number-consult.pulse {
-  animation: highlightPulse 1s ease-in-out;
-}
-
-@keyframes highlightPulse {
-  0% { box-shadow: 0 0 35px rgba(0,123,255,0.8); transform:scale(1); }
-  50% { box-shadow: 0 0 70px rgba(0,123,255,0.9); transform:scale(1.15); }
-  100% { box-shadow: 0 0 35px rgba(0,123,255,0.8); transform:scale(1); }
-}
-
-
+  #gridsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+  }
+  #centerPanel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+    flex: 1;
+  }
+  .queue-number-consult {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .queue-number-consult .prefix {
+    font-size: 2em; 
+    margin-top: 10px;
+    margin-bottom: 5px;
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+  }
+  .queue-number-consult .main-number {
+    font-size: clamp(7rem, 25vw, 12rem);
+    font-weight: 900;
+    margin-top: 50px;
+  }
+  .queue-number.pulse, .queue-number-consult.pulse {
+    animation: highlightPulse 1s ease-in-out;
+  }
+  @keyframes highlightPulse {
+    0% { box-shadow: 0 0 35px rgba(0,123,255,0.8); transform:scale(1); }
+    50% { box-shadow: 0 0 70px rgba(0,123,255,0.9); transform:scale(1.15); }
+    100% { box-shadow: 0 0 35px rgba(0,123,255,0.8); transform:scale(1); }
+  }
   #owcContainer {
-    background:rgba(245,245,245,0.55); backdrop-filter:blur(8px); border-radius:25px;   padding: 10px 20px; /* reduce top/bottom padding */
+    background:rgba(245,245,245,0.55); backdrop-filter:blur(8px); border-radius:25px; padding: 10px 20px;
     flex:0 0 auto; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.08); margin-top:10px;
-    transition:opacity .35s ease, max-height .4s ease, transform .35s ease; max-height:0; opacity:0; transform:translateY(-12px) scale(.995); pointer-events:none;
+    transition:opacity .35s ease, max-height .4s ease, transform .35s ease; max-height:0; opacity:0; transform:translateY(-12px) scale(.995);
   }
   #owcContainer.visible { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
   #owcContainer.hidden { opacity:0; transform:translateY(-12px) scale(.995); pointer-events:none; }
- #owcContainer h2 {
+  #owcContainer h2 {
     font-size: 2em;
-    margin: 5px 0 15px 0; /* top margin smaller */
+    margin: 5px 0 15px 0;
     color: #d9534f;
     text-align: center;
-}
-#owcList {
-  display: grid;
-  gap: 10px;
-  align-items: start;
-  grid-template-columns: repeat(auto-fit, minmax(calc(10% - 10px), 1fr));
-}
-
-@media (max-width:1200px){ #owcList { grid-template-columns: repeat(6,1fr); } }
-@media (max-width:700px) { #owcList { grid-template-columns: repeat(4,1fr); } }
-@media (max-width:500px) { #owcList { grid-template-columns: repeat(2,1fr); } }
-
+  }
+  #owcList {
+    display: grid;
+    gap: 10px;
+    align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(calc(10% - 10px), 1fr));
+  }
+  @media (max-width:1200px){ #owcList { grid-template-columns: repeat(6,1fr); } }
+  @media (max-width:700px) { #owcList { grid-template-columns: repeat(4,1fr); } }
+  @media (max-width:500px) { #owcList { grid-template-columns: repeat(2,1fr); } }
   .owc-item { font-size:1.6em; padding:12px; border-radius:15px; background:rgba(217,83,79,0.85); text-align:center; font-weight:700; color:#fff; animation:pulse 1.5s infinite; opacity:0; transform:translateY(8px); }
-  @keyframes pulse { 0% { box-shadow:0 0 10px rgba(217,83,79,0.7);} 50% { box-shadow:0 0 25px rgba(217,83,79,0.7);} 100% { box-shadow:0 0 10px rgba(217,83,79,0.7);} }
 
+  /* --------- New Medical Certificate List --------- */
+  #mcListContainer {
+    background: rgba(245, 245, 245, 0.55);
+    backdrop-filter: blur(8px);
+    border-radius: 25px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 255, 0.3); /* Blue background for container */
+    max-height: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease, max-height 0.4s ease, transform 0.35s ease;
+    transform: translateY(-12px) scale(.995);
+  }
+  #mcListContainer.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  #mcListContainer.hidden {
+    opacity: 0;
+    transform: translateY(-12px) scale(.995);
+    pointer-events: none;
+  }
+  /* Title in blue */
+  #mcListContainer h2 {
+    font-size: 2em;
+    margin: 5px 0 15px 0;
+    color: #007bff; /* Blue color for title text */
+    text-align: center;
+  }
+  /* List items in blue background and pulse in blue */
+  #mcList {
+    display: grid;
+    gap: 10px;
+    align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(calc(10% - 10px), 1fr));
+  }
+  @media (max-width:1200px){ #mcList { grid-template-columns: repeat(6,1fr); } }
+  @media (max-width:700px) { #mcList { grid-template-columns: repeat(4,1fr); } }
+  @media (max-width:500px) { #mcList { grid-template-columns: repeat(2,1fr); } }
+  /* Make each item blue with pulse animation in blue */
+  .mc-item { 
+    font-size:1.6em; 
+    padding:12px; 
+    border-radius:15px; 
+    background:#007bff; /* Bright blue background for items */
+    text-align:center; 
+    font-weight:700; 
+    color:#fff; 
+    animation:pulseBlue 1.5s infinite; /* Pulse in blue */
+    opacity:0; 
+    transform:translateY(8px); 
+  }
+  @keyframes pulseBlue {
+    0% { box-shadow: 0 0 10px rgba(0,123,255,0.7); }
+    50% { box-shadow: 0 0 25px rgba(0,123,255,0.7); }
+    100% { box-shadow: 0 0 10px rgba(0,123,255,0.7); }
+  }
+
+  /* --------- START OVERLAY --------- */
   #startOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; z-index:1000; }
   #startOverlay button { padding:20px 40px; font-size:2em; border:none; border-radius:15px; background:#007bff; color:white; cursor:pointer; }
 
-  @media (max-width:1200px){ #gridsContainer{flex-direction:column;} #centerPanel{grid-template-rows:auto auto auto;} #owcList{grid-template-columns:repeat(3,1fr);} }
-  @media (max-width:700px){ #owcList{grid-template-columns:repeat(2,1fr);} .queue-number-consult{font-size: clamp(3.2rem, 18vw, 6rem); } .queue-number{font-size: clamp(2rem, 8vw, 2.8rem); } }
+  /* --------- RESPONSIVE ADJUSTMENTS --------- */
+  @media (max-width:1200px){ #gridsContainer { flex-direction:column; } #centerPanel { grid-template-rows:auto auto auto; } #owcList { grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:700px){ #owcList { grid-template-columns:repeat(2,1fr); } .queue-number-consult { font-size: clamp(3.2rem, 18vw, 6rem); } .queue-number { font-size: clamp(2rem, 8vw, 2.8rem); } }
 
-#centerPanel .table-box {
-  background: #28a745; /* green background */
-  color: #fff;
-  border-radius: 25px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* centers the number vertically */
-  align-items: center;
-  position: relative; /* allows title to be positioned at bottom */
-  overflow: hidden;
-  min-height: 150px;
-  padding: 10px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
+  #centerPanel .table-box {
+    background: #28a745;
+    color: #fff;
+    border-radius: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 150px;
+    padding: 10px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  }
 
-.queue-number-consult {
-  font-size: 5rem; /* scales automatically */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1 1 auto; /* grows to fill space */
-  width: 100%;
-  max-height: 100%;
-  overflow: hidden;
-}
+  .queue-number-consult {
+    font-size: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1 1 auto;
+    width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
 
-.table-box .title {
-  position: absolute;
-  bottom: 10px; /* sticks to bottom */
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 6em; /* much bigger */
-  font-weight: 900; /* bold */
-  text-align: center;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.15); /* subtle contrast */
-  width: calc(100% - 20px);
-}
-@media (max-width:900px){
-  .table-box .title { font-size: 1.8em; }
-}
-@media (max-width:600px){
-  .table-box .title { font-size: 1.5em; }
-}
-@media (max-width:500px){
-  .table-box .title { font-size: 1.2em; }
-}
-
+  .table-box .title {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 6em;
+    font-weight: 900;
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.15);
+    width: calc(100% - 20px);
+  }
+  @media (max-width:900px){
+    .table-box .title { font-size: 1.8em; }
+  }
+  @media (max-width:600px){
+    .table-box .title { font-size: 1.5em; }
+  }
+  @media (max-width:500px){
+    .table-box .title { font-size: 1.2em; }
+  }
 </style>
 </head>
 <body>
@@ -221,9 +268,9 @@
 <div id="topHeader">
   <div id="headerCenter">
     <div id="headerRow">
-      <img id="headerLogoLeft" src="R2TMC_LOGO-removebg-preview.png" alt="Hospital Logo">
+      <img id="headerLogoLeft" src="R2TMC_LOGO-removebg-preview.png" alt="Hospital Logo" />
       <div id="headerTitle">OPHTHALMOLOGY CLINIC</div>
-      <img id="headerLogoRight" src="dohlogo.png" alt="Hospital Logo">
+      <img id="headerLogoRight" src="dohlogo.png" alt="Hospital Logo" />
     </div>
     <div id="headerClock">00:00:00</div>
   </div>
@@ -236,26 +283,35 @@
 <div id="mainContainer" style="display:none;">
   <div id="gridsContainer">
 
-<div id="centerPanel">
-  <div class="table-box">
-    <div class="queue-number-consult" id="num1">
-      <div class="prefix"></div>
-      <div class="main-number"></div>
+    <!-- Table 1 & 2 -->
+    <div id="centerPanel">
+      <div class="table-box">
+        <div class="queue-number-consult" id="num1">
+          <div class="prefix"></div>
+          <div class="main-number"></div>
+        </div>
+        <div class="title">Table 1</div>
+      </div>
+      <div class="table-box">
+        <div class="queue-number-consult" id="num2">
+          <div class="prefix"></div>
+          <div class="main-number"></div>
+        </div>
+        <div class="title">Table 2</div>
+      </div>
     </div>
-    <div class="title">Table 1</div>
-  </div>
 
-  <div class="table-box">
-    <div class="queue-number-consult" id="num2">
-      <div class="prefix"></div>
-      <div class="main-number"></div>
+    <!-- OWC List -->
+    <div id="owcContainer" class="hidden">
+      <h2>OUT WHEN CALLED</h2>
+      <div id="owcList"></div>
     </div>
-    <div class="title">Table 2</div>
-  </div>
-</div>
-  <div id="owcContainer" class="hidden">
-    <h2>OUT WHEN CALLED</h2>
-    <div id="owcList"></div>
+
+    <!-- Medical Certificate List -->
+    <div id="mcListContainer" class="hidden">
+      <h2>Medical Certificate List</h2>
+      <div id="mcList"></div>
+    </div>
   </div>
 </div>
 
@@ -276,7 +332,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getDatabase(app);
 
 /* ---------- LIVE CLOCK ---------- */
@@ -340,7 +395,7 @@ function shouldAnnounce(num,table){
 const tableColors = { 1:"#28a745",2:"#28a745",3:"#28a745",4:"#28a745",5:"#28a745", vip:"#ff9800" };
 function updateVitalDisplayed(numbers){ numbers.forEach(n=>vitalDisplayed.add(n)); localStorage.setItem('vitalDisplayed',JSON.stringify([...vitalDisplayed])); }
 
-/* ---------- TABLES 1-5 ---------- */
+/* ---------- TABLES 1-2 ---------- */
 function loadTables() {
   const tableIds = [1, 2];
 
@@ -358,22 +413,27 @@ function loadTables() {
     onValue(ref(db, `tableNumbers/table${i}`), snap => {
       const val = snap.val();
 
-      if (val === null || val === undefined || val === "-RESET-") {
-        prefixEl.textContent = "";
-        mainEl.textContent = "";
-        numEl.style.background = tableColors[i];
-        lastKnown = "";
-        localStorage.removeItem(`table${i}`);
-        return;
-      }
+if (val === null || val === undefined || val === "-RESET-") {
+  prefixEl.textContent = "";
+  mainEl.textContent = "-"; // Show dash if reset
+  numEl.style.background = tableColors[i];
+  lastKnown = "";
+  localStorage.removeItem(`table${i}`);
+  return;
+}
 
-      if (val === "" || val === "-") return;
-      if (val === lastKnown) return;
+if (val === "" || val === "-" || val === "0") {
+  prefixEl.textContent = "";
+  mainEl.textContent = "-"; // Show dash for empty, "-" or 0
+  numEl.style.background = tableColors[i];
+  lastKnown = val;
+  return;
+}
 
-      const [prefix, rawNum] = val.split("-");
-      const mainNumber = rawNum ? parseInt(rawNum, 10) : val;
-      prefixEl.textContent = prefix || "";
-      mainEl.textContent = mainNumber;
+const [prefix, rawNum] = val.split("-");
+const mainNumber = rawNum ? parseInt(rawNum, 10) : val;
+prefixEl.textContent = prefix || "";
+mainEl.textContent = mainNumber;
 
       lastKnown = val;
       localStorage.setItem(`table${i}`, val);
@@ -396,7 +456,12 @@ function loadOWCList(){
   const owcList=document.getElementById('owcList');
   onValue(ref(db,"owc"), snap=>{
     owcList.innerHTML='';
-    if(!snap.exists()){ owcContainer.classList.add('hidden'); owcContainer.classList.remove('visible'); owcContainer.style.maxHeight="0px"; return; }
+    if(!snap.exists()){ 
+      owcContainer.classList.add('hidden'); 
+      owcContainer.classList.remove('visible'); 
+      owcContainer.style.maxHeight="0px"; 
+      return; 
+    }
     const values=Object.values(snap.val()||{});
     const sorted=values.sort((a,b)=>{
       const [pA,nA]=(a.number||"").split("-");
@@ -410,19 +475,115 @@ function loadOWCList(){
  owcList.appendChild(div);
       requestAnimationFrame(()=>{ div.style.transition="opacity .28s ease, transform .28s ease"; div.style.opacity=1; div.style.transform="translateY(0)"; });
     });
-    if(sorted.length>0){ owcContainer.classList.remove('hidden'); owcContainer.classList.add('visible'); requestAnimationFrame(()=>{ owcContainer.style.maxHeight = owcContainer.scrollHeight + "px"; }); }
-    else{ owcContainer.classList.remove('visible'); owcContainer.classList.add('hidden'); owcContainer.style.maxHeight="0px"; }
+    if(sorted.length>0){ 
+      owcContainer.classList.remove('hidden'); 
+      owcContainer.classList.add('visible'); 
+      requestAnimationFrame(()=>{ owcContainer.style.maxHeight = owcContainer.scrollHeight + "px"; }); 
+    }
+    else{ 
+      owcContainer.classList.remove('visible'); 
+      owcContainer.classList.add('hidden'); 
+      owcContainer.style.maxHeight="0px"; 
+    }
   });
 }
 
+/* ---------- MEDICAL CERTIFICATE LIST ---------- */
+function loadMedicalCertificates() {
+  const mcContainer = document.getElementById('mcListContainer');
+  const mcList = document.getElementById('mcList');
+
+  const refPath = "checkedHistoryNumbers"; // your Firebase path
+  const mcRef = ref(db, refPath);
+
+  let lastEntries = [];
+  onValue(mcRef, (snap) => {
+    mcList.innerHTML = '';
+
+    if (!snap.exists()) {
+      mcContainer.classList.add('hidden');
+      mcContainer.classList.remove('visible');
+      mcContainer.style.maxHeight = "0px";
+      return;
+    }
+
+    const data = Object.values(snap.val() || {});
+    // Save previous entries to compare
+    const previousEntries = lastEntries;
+    lastEntries = data.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Announce new entries
+    for (let entry of lastEntries) {
+      // Find if this is a new entry (not in previousEntries)
+      const isNew = !previousEntries.some(prev => prev.number === entry.number && prev.timestamp === entry.timestamp);
+      if (isNew) {
+        const [prefix, num] = (entry.number || "").split("-");
+        let speechPrefix = prefix || "";
+        if (speechPrefix.toUpperCase() === "OP") {
+          speechPrefix = "O P";
+        }
+        // Remove leading zeros from the number for speech
+        const numWithoutLeadingZeros = (num || "").replace(/^0+/, '');
+        const announceText = `${speechPrefix} number ${numWithoutLeadingZeros}, please claim your medical certificate at the Ophthalmology Clinic Room 201, Nurse Station.`;
+        // Speak
+        const utter = new SpeechSynthesisUtterance(announceText);
+        if (voices.length) utter.voice = getRandomVoice();
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    // --- Group entries by prefix ---
+    const grouped = {};
+    data.forEach(entry => {
+      const [prefix, num] = (entry.number || "").split("-");
+      if (!grouped[prefix]) {
+        grouped[prefix] = [];
+      }
+      grouped[prefix].push(entry);
+    });
+
+    // Clear current list
+    mcList.innerHTML = '';
+
+    // For each prefix group, sort numerically and display
+    Object.keys(grouped).sort().forEach(prefix => {
+      const sortedEntries = grouped[prefix].sort((a, b) => {
+        const numA = parseInt((a.number || "").split("-")[1], 10) || 0;
+        const numB = parseInt((b.number || "").split("-")[1], 10) || 0;
+        return numA - numB;
+      });
+
+      // Display sorted entries without header
+      sortedEntries.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'mc-item';
+        div.textContent = entry.number; // e.g., "OP-001"
+        mcList.appendChild(div);
+        requestAnimationFrame(() => {
+          div.style.transition = "opacity .28s ease, transform .28s ease";
+          div.style.opacity = 1;
+          div.style.transform = "translateY(0)";
+        });
+      });
+    });
+
+    // Show the container
+    mcContainer.classList.remove('hidden');
+    mcContainer.classList.add('visible');
+    requestAnimationFrame(() => {
+      mcContainer.style.maxHeight = mcContainer.scrollHeight + "px";
+    });
+  });
+}
 /* ---------- RECALL EVENTS ---------- */
 onValue(ref(db,"recallEvents"), snap=>{
   if(!snap.exists()) return;
   const events=Object.values(snap.val());
   events.forEach(e=>{
     let numEl;
-    if(e.table===1){ numEl = Array.from(document.querySelectorAll('#num1List .queue-number')).find(d=>d.textContent===e.number); }
-    else numEl=document.getElementById('num'+e.table);
+    if(e.table===1){ numEl = document.querySelector('#num1'); }
+    else if(e.table===2){ numEl=document.getElementById('num2'); }
+    else return;
     if(numEl){ numEl.classList.add("pulse"); setTimeout(()=>numEl.classList.remove("pulse"),1000); }
     speakQueuedNumber(e.number,e.table,"Now recalling");
   });
@@ -436,8 +597,8 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   speakQueuedNumber("Dashboard started",0,"");
   loadTables();
   loadOWCList();
+  loadMedicalCertificates();
 });
-
 </script>
 </body>
 </html>
